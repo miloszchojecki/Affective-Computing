@@ -130,17 +130,89 @@ Compare stress detection performance between comfortable wrist-worn device and p
 
 ---
 
+### Experiment 3: Multiclass Affective State Detection
+**Notebook:** `multiclass_detection_wesad.ipynb`
+
+#### Objective
+Classify **four distinct affective states** (baseline, stress, amusement, meditation) using wrist-worn device signals, extending beyond binary stress detection to comprehensive emotional state recognition.
+
+#### Signals Used
+Same as Experiment 1 - Empatica E4 wrist device:
+| Signal | Sampling Rate | Description |
+|--------|---------------|-------------|
+| BVP | 64 Hz | Blood Volume Pulse (photoplethysmography) |
+| EDA | 4 Hz | Electrodermal Activity (skin conductance) |
+| TEMP | 4 Hz | Skin temperature |
+
+#### Methodology
+1. **Classes:** 4-class problem (baseline, stress, amusement, meditation)
+2. **Windowing:** 60-second windows with no overlap (60s shift) 
+3. **Feature Extraction** using NeuroKit2:
+   - Same feature set as binary experiments (16 features total)
+   - EDA, BVP/HR, and TEMP statistical and physiological features
+4. **Classification:** Random Forest with balanced class weights
+5. **Validation:** Leave-One-Subject-Out (LOSO) cross-validation
+
+#### Results
+
+| Metric | Value |
+|--------|-------|
+| **Overall Accuracy** | 62.7% (±12.7%) |
+| **F1-Score (macro)** | 51.3% (±12.6%) |
+| **F1-Score (weighted)** | 59.1% |
+
+**Per-class performance:**
+
+| Class | Precision | Recall | F1-Score | Support |
+|-------|-----------|---------|----------|---------|
+| **Baseline** | 62% | 79% | 70% | 290 samples |
+| **Stress** | 77% | 79% | 78% | 165 samples |
+| **Amusement** | 17% | 2% | 4% | 92 samples |
+| **Meditation** | 54% | 53% | 53% | 194 samples |
+
+**Per-subject results (selected):**
+
+| Subject | Accuracy | F1-Score |
+|---------|----------|----------|
+| S16 | 79.2% | 69.5% |
+| S11 | 78.4% | 62.3% |
+| S10 | 72.5% | 58.5% |
+| S9 | 78.4% | 60.5% |
+| S4 | 67.3% | 51.7% |
+| S14 | 32.0% | 17.7% |
+
+#### Key Findings
+1. **Stress detection remains robust** (77% precision, 78% F1-score) even in multiclass setting
+2. **Baseline state well-recognized** (79% recall) - good reference state detection  
+3. **Amusement poorly classified** (2% recall) - challenging to distinguish from other states
+4. **Meditation moderately detectable** (53% F1-score) - distinct but not always clear
+5. **High inter-subject variability** (accuracy range: 32-79%) - individual differences matter
+
+#### Challenges
+- **Class imbalance:** Amusement significantly underrepresented (92 vs 290 baseline samples)
+- **Subtle physiological differences** between some emotional states
+- **Individual response patterns** vary greatly between subjects
+- **Wrist-based sensors** may not capture all relevant physiological markers for emotion
+
+#### Comparison with Binary Classification
+- **Stress vs. baseline binary:** ~88% accuracy
+- **Stress in multiclass:** 78% F1-score  
+- **Performance trade-off:** Adding more classes reduces individual class accuracy but provides richer emotional context
+
+---
+
 ## Project Structure
 
 ```
 Affective-Computing/
-├── stress_detection_wesad.ipynb    # Main stress detection pipeline
-├── chest_vs_wrist_comparison.ipynb # Sensor comparison experiment
-├── wesad_features.csv              # Extracted features dataset
-├── loso_results.csv                # Per-subject LOSO results
-├── chest_vs_wrist_comparison.csv   # Comparison results
-├── stress_detection_model.joblib   # Trained model
-└── archive/WESAD/                  # Dataset (not in repo)
+├── stress_detection_wesad.ipynb       # Binary stress detection pipeline  
+├── chest_vs_wrist_comparison.ipynb    # Sensor comparison experiment
+├── multiclass_detection_wesad.ipynb   # 4-class affective state detection
+├── wesad_features.csv                 # Extracted features dataset
+├── loso_results.csv                   # Per-subject LOSO results
+├── chest_vs_wrist_comparison.csv      # Comparison results  
+├── stress_detection_model.joblib      # Trained binary model
+└── archive/WESAD/                     # Dataset (not in repo)
 ```
 
 ## Requirements
@@ -161,11 +233,14 @@ tqdm
 # Clone repository
 git clone https://github.com/miloszchojecki/Affective-Computing.git
 
-# Run main experiment
+# Run main experiment (binary stress detection)
 jupyter notebook stress_detection_wesad.ipynb
 
 # Run sensor comparison
 jupyter notebook chest_vs_wrist_comparison.ipynb
+
+# Run multiclass affective state detection  
+jupyter notebook multiclass_detection_wesad.ipynb
 ```
 
 ---
